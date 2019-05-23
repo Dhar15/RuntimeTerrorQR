@@ -2,19 +2,30 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title> Suggestion </title>
+    <title> Feedback </title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'CSS/suggestion.css') }}">
 </head>
 <body>
 <form NAME = "REGFORM" METHOD = "POST" action = /suggestion >
 <div class="contact-form">
-        <h2 class = "section-name"> Liked/Disliked something? let us know </h2>
-        <p>Your name please? </p>
+        <h2 class = "section-name"> Liked/Disliked something? Please let us know here- </h2>
+        <p> User name- </p>
         <input type = "text" placeholder="Your name here" name = "name" autocomplete="off">
-        <p> Tell us what you feel about out project </p>
-        <textarea type = "text" placeholder="Write here " name = "feedback" autocomplete="off" rows=35 cols=150 autofocus=autofocus onfocus="this.value=''" required>  </textarea>
 
-        <button type = "submit" VALUE = "Submit" > Submit </button>
+        <h2> Rate us - </h2>
+        <fieldset class="rating">
+            <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="Rocks!">5 stars</label>
+            <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="Pretty good">4 stars</label>
+            <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="Meh">3 stars</label>
+            <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="Kinda bad">2 stars</label>
+            <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="Sucks big time">1 star</label>
+        </fieldset>
+            
+        <p> Tell us what you feel about out project </p>
+        <textarea type = "text" placeholder="Write here " name = "feedback" autocomplete="off" rows=20 cols=60 autofocus=autofocus onfocus="this.value=''" required>  </textarea>
 </div>
+<br>
+<button type = "submit" VALUE = "Submit" > Submit </button>
 </form>
 </body>
 </html>
