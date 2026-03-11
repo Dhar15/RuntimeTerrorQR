@@ -130,15 +130,3 @@
     color: var(--accent);
     margin-bottom: 12px;
 }
-
-.team-card-contact {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.team-card-contact span {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-muted);
-}

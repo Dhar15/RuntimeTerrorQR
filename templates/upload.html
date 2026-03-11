@@ -6,6 +6,159 @@
     <title>Decode QR — Runtime Terror</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/form.css') }}">
+    <style>
+        /* ── Google Lens tip banner ───────────────────── */
+        .lens-tip {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            background: rgba(245, 166, 35, 0.07);
+            border: 1px solid rgba(245, 166, 35, 0.3);
+            border-radius: var(--radius);
+            margin-bottom: 28px;
+            max-width: 580px;
+        }
+        .lens-tip-icon { font-size: 22px; flex-shrink: 0; }
+        .lens-tip-text {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.06em;
+            color: var(--accent2);
+            line-height: 1.6;
+        }
+        .lens-tip-text strong {
+            display: block;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        /* ── Rich result card ─────────────────────────── */
+        .result-card {
+            margin-top: 32px;
+            max-width: 580px;
+            background: var(--bg-surface);
+            border: 1px solid rgba(0,229,200,0.3);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            animation: fadeUp 0.4s ease both;
+            box-shadow: 0 0 40px rgba(0,229,200,0.07);
+        }
+
+        .result-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 22px;
+            background: rgba(0,229,200,0.06);
+            border-bottom: 1px solid rgba(0,229,200,0.15);
+        }
+
+        .result-card-header-icon { font-size: 18px; }
+
+        .result-card-header-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .result-card-header-badge {
+            margin-left: auto;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            padding: 3px 10px;
+            border-radius: 100px;
+            background: rgba(0,229,200,0.15);
+            color: var(--accent);
+            border: 1px solid rgba(0,229,200,0.3);
+            letter-spacing: 0.1em;
+        }
+
+        .result-card-body { padding: 22px; }
+
+        /* Parsed vCard fields */
+        .vcard-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .vcard-field {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .vcard-field-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .vcard-field-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+        }
+
+        .vcard-field-value {
+            font-size: 15px;
+            color: var(--text);
+            word-break: break-all;
+        }
+
+        .vcard-field-value a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .vcard-field-value a:hover { text-decoration: underline; }
+
+        /* Divider inside card */
+        .result-card-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 18px 0;
+        }
+
+        /* Raw / fallback block */
+        .result-raw {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text);
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.8;
+            padding: 18px 22px;
+        }
+
+        .result-raw-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
 
@@ -17,7 +170,6 @@
         <li><a href="/upload" class="active">Decode</a></li>
         <li><a href="/suggestion">Feedback</a></li>
         <li><a href="/about">Team</a></li>
-        
     </ul>
     <button class="nav-toggle" id="navToggle">&#9776;</button>
 </nav>
@@ -32,15 +184,128 @@
             <input type="file" id="qr_file" name="qr_file" accept="image/*" required>
             <p class="form-hint">Supported: PNG, JPG, GIF, BMP, WEBP</p>
         </div>
-
         <button type="submit" class="btn btn-solid">&#8686; &nbsp;Decode</button>
     </form>
 
     {% if results %}
-    <div class="result-box">
-        <strong>Decoded content</strong>
+    <div class="result-card" id="resultCard">
         {% for r in results %}
-            <pre>{{ r }}</pre>
+            {% set text = r %}
+            {% if 'BEGIN:VCARD' in text %}
+                <!-- ── vCard contact ───────────────────── -->
+                <div class="result-card-header">
+                    <span class="result-card-header-icon">📇</span>
+                    <span class="result-card-header-title">Contact Card</span>
+                    <span class="result-card-header-badge">vCard</span>
+                </div>
+                <div class="result-card-body">
+                    <div class="vcard-grid">
+                        {% set lines = text.split('\n') %}
+                        {% for line in lines %}
+                            {% if line.startswith('N:') or line.startswith('FN:') %}
+                            <div class="vcard-field">
+                                <div class="vcard-field-icon">👤</div>
+                                <div>
+                                    <div class="vcard-field-label">Name</div>
+                                    <div class="vcard-field-value">{{ line.split(':',1)[1] }}</div>
+                                </div>
+                            </div>
+                            {% elif line.startswith('TEL') %}
+                            <div class="vcard-field">
+                                <div class="vcard-field-icon">📞</div>
+                                <div>
+                                    <div class="vcard-field-label">Phone</div>
+                                    <div class="vcard-field-value">
+                                        <a href="tel:{{ line.split(':',1)[1] }}">{{ line.split(':',1)[1] }}</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% elif line.startswith('EMAIL') %}
+                            <div class="vcard-field">
+                                <div class="vcard-field-icon">✉️</div>
+                                <div>
+                                    <div class="vcard-field-label">Email</div>
+                                    <div class="vcard-field-value">
+                                        <a href="/cdn-cgi/l/email-protection#fc8787dc90959299d28f8c909588d4dbc6dbd0cdd5a7cda1dc8181">{{ line.split(':',1)[1] }}</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% elif line.startswith('ORG:') %}
+                            <div class="vcard-field">
+                                <div class="vcard-field-icon">🏢</div>
+                                <div>
+                                    <div class="vcard-field-label">Organisation</div>
+                                    <div class="vcard-field-value">{{ line.split(':',1)[1] }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+            {% elif text.startswith('https://wa.me') or text.startswith('http://wa.me') %}
+                <!-- ── WhatsApp ────────────────────────── -->
+                <div class="result-card-header">
+                    <span class="result-card-header-icon">💬</span>
+                    <span class="result-card-header-title">WhatsApp Link</span>
+                    <span class="result-card-header-badge">WhatsApp</span>
+                </div>
+                <div class="result-card-body">
+                    <div class="vcard-field">
+                        <div class="vcard-field-icon">🔗</div>
+                        <div>
+                            <div class="vcard-field-label">Open Chat</div>
+                            <div class="vcard-field-value"><a href="{{ text }}" target="_blank">{{ text }}</a></div>
+                        </div>
+                    </div>
+                </div>
+
+            {% elif text.startswith('mailto:') %}
+                <!-- ── Email ──────────────────────────── -->
+                <div class="result-card-header">
+                    <span class="result-card-header-icon">✉️</span>
+                    <span class="result-card-header-title">Email</span>
+                    <span class="result-card-header-badge">mailto</span>
+                </div>
+                <div class="result-card-body">
+                    <div class="vcard-field">
+                        <div class="vcard-field-icon">📧</div>
+                        <div>
+                            <div class="vcard-field-label">Compose</div>
+                            <div class="vcard-field-value"><a href="{{ text }}">{{ text }}</a></div>
+                        </div>
+                    </div>
+                </div>
+
+            {% elif text.startswith('http://') or text.startswith('https://') %}
+                <!-- ── URL ────────────────────────────── -->
+                <div class="result-card-header">
+                    <span class="result-card-header-icon">🔗</span>
+                    <span class="result-card-header-title">URL</span>
+                    <span class="result-card-header-badge">Link</span>
+                </div>
+                <div class="result-card-body">
+                    <div class="vcard-field">
+                        <div class="vcard-field-icon">🌐</div>
+                        <div>
+                            <div class="vcard-field-label">Open Link</div>
+                            <div class="vcard-field-value"><a href="{{ text }}" target="_blank">{{ text }}</a></div>
+                        </div>
+                    </div>
+                </div>
+
+            {% else %}
+                <!-- ── Generic / custom text ──────────── -->
+                <div class="result-card-header">
+                    <span class="result-card-header-icon">📄</span>
+                    <span class="result-card-header-title">Decoded Content</span>
+                    <span class="result-card-header-badge">Text</span>
+                </div>
+                <div class="result-raw">
+                    <div class="result-raw-label">Raw data</div>
+                    {{ text }}
+                </div>
+            {% endif %}
         {% endfor %}
     </div>
     {% endif %}
@@ -50,10 +315,9 @@
     {% endif %}
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     document.getElementById('navToggle').addEventListener('click', function () {
         document.getElementById('navLinks').classList.toggle('open');
     });
 </script>
 </body>
-</html>

@@ -299,6 +299,10 @@
         </div>
 
         <button type="submit" class="btn btn-solid">&#9654; &nbsp;Generate QR Code</button>
+
+        {% if error %}
+        <div class="error-box" style="margin-top:20px">&#9888; &nbsp;{{ error }}</div>
+        {% endif %}
     </form>
 </div>
 

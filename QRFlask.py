@@ -51,7 +51,14 @@ def hex_to_rgb(hex_str):
 def make_qr(data, fg="#000000", bg="#ffffff", fname=None):
     """Generate a QR PNG, save to UP_FOLDER, return the filename."""
     warnings.filterwarnings("ignore")
-    fname = (fname or "temp") + str(time.time())
+    base = (fname or "qr").strip() or "qr"
+    # re-use existing file if same name; add _2, _3 ... on collision
+    candidate = base + ".png"
+    counter = 2
+    while os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], candidate)):
+        candidate = f"{base}_{counter}.png"
+        counter += 1
+    out_name = candidate
 
     fg_rgb = hex_to_rgb(fg)
     bg_rgb = hex_to_rgb(bg)
@@ -66,7 +73,6 @@ def make_qr(data, fg="#000000", bg="#ffffff", fname=None):
         color_mask=SolidFillColorMask(front_color=fg_rgb, back_color=bg_rgb)
     )
 
-    out_name = fname + ".png"
     out_path = os.path.join(app.config['UPLOAD_FOLDER'], out_name)
     img.save(out_path)
     return out_name
@@ -118,9 +124,15 @@ def form():
             data = url
 
         else:  # custom
-            data = request.form.get("custom_text", "")
+            data = request.form.get("custom_text", "").strip()
+            if not data:
+                return render_template("form.html", error="Custom text cannot be empty.")
 
-        out_name = make_qr(data, fg=fg_color, bg=bg_color, fname=fname)
+        try:
+            out_name = make_qr(data, fg=fg_color, bg=bg_color, fname=fname)
+        except Exception as e:
+            return render_template("form.html", error=f"QR generation failed: {str(e)}")
+
         app.config['THEFILE'] = out_name
         return render_template("QR.html",
                                user_image=os.path.join(app.config['UPLOAD_FOLDER'], out_name),

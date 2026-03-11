@@ -33,6 +33,32 @@
             justify-content: center;
             animation: fadeUp 0.5s 0.15s ease both;
         }
+
+        /* ── Google Lens tip ─────────────────────────── */
+        .lens-tip {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            background: rgba(245, 166, 35, 0.07);
+            border: 1px solid rgba(245, 166, 35, 0.3);
+            border-radius: var(--radius);
+            max-width: 360px;
+        }
+        .lens-tip-icon { font-size: 20px; flex-shrink: 0; }
+        .lens-tip-text {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            color: var(--accent2);
+            line-height: 1.6;
+        }
+        .lens-tip-text strong {
+            display: block;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(14px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -60,7 +86,14 @@
         <div class="qr-img-wrap">
             <img src="{{ user_image }}" alt="Generated QR Code">
         </div>
-        <div class="qr-actions">
+        <div class="lens-tip">
+                    <span class="lens-tip-icon">&#128269;</span>
+                    <div class="lens-tip-text">
+                        <strong>Pro Tip</strong>
+                        For best results on mobile, scan with <strong>Google Lens</strong> — it handles styled &amp; coloured QR codes better than the default camera app.
+                    </div>
+                </div>
+                <div class="qr-actions">
             <a href="/QR/{{ fname }}" class="btn btn-solid">&#8681; &nbsp;Download PNG</a>
             <a href="/" class="btn">&#8592; &nbsp;Home</a>
         </div>
