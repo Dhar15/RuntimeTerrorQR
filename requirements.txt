@@ -1,0 +1,6 @@
+flask>=2.0
+qrcode[pil]
+Pillow
+pyzbar
+opencv-python-headless
+numpy

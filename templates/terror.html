@@ -1,40 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title> RUNTIME TERROR </title>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'CSS/terror.css') }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Runtime Terror — QR Encoder / Decoder</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/terror.css') }}">
 </head>
-<script>
-        function myFunction() {
-          var x = document.getElementById("myTopnav");
-          if (x.className === "topnav") {
-            x.className += " responsive";
-          } else {
-            x.className = "topnav";
-          }
-        }
-</script>
 <body>
-  <div class="topnav" id="myTopnav">
-    <a class="active" href="#home"> Home </a>
-    <a href="\form"> Generate QR code </a>
-    <a href="\upload"> Decode QR code </a>
-    <a href="\suggestion"> Feedbacks </a>
-    <a href="\about"> About </a>
-    <a href="\reach"> Reach us </a>
-    <a href="javascript:void(0);" class="icon" onclick="myFunction()"></a>
+
+<nav class="topnav" id="topnav">
+    <a class="nav-logo" href="/">RUNTIME<span>TERROR</span></a>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="/" class="active">Home</a></li>
+        <li><a href="/form">Encode</a></li>
+        <li><a href="/upload">Decode</a></li>
+        <li><a href="/suggestion">Feedback</a></li>
+        <li><a href="/about">Team</a></li>
+        
+    </ul>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">&#9776;</button>
+</nav>
+
+<section class="hero">
+    <div class="hero-content">
+        <p class="hero-eyebrow">QR Encoder &amp; Decoder</p>
+        <h1>RUNTIME <span>TERROR</span></h1>
+        <p>Generate contact QR codes in seconds. Decode any QR image instantly. Built for speed, designed for scale.</p>
+        <div class="hero-actions">
+            <a href="/form" class="btn btn-solid">&#9654; Encode QR</a>
+            <a href="/upload" class="btn">&#8686; Decode QR</a>
+        </div>
+    </div>
+</section>
+
+<div class="features">
+    <div class="feature-item">
+        <span class="feature-icon">&#9632;</span>
+        <div class="feature-title">ENCODE</div>
+        <p class="feature-desc">Turn a contact's name, phone, and email into a shareable QR code instantly.</p>
+    </div>
+    <div class="feature-item">
+        <span class="feature-icon">&#128247;</span>
+        <div class="feature-title">DECODE</div>
+        <p class="feature-desc">Upload any QR image and extract its embedded data in one click.</p>
+    </div>
+    <div class="feature-item">
+        <span class="feature-icon">&#8681;</span>
+        <div class="feature-title">DOWNLOAD</div>
+        <p class="feature-desc">Save your generated QR codes as PNG files, ready to print or share.</p>
+    </div>
 </div>
 
-<div class = "main">
-        <div class="top-wrapper">
-          <div class="container">
-            <h1> Welcome. We are the Runtime Terror. </h1>
-            <p> We offer an easy solution to contact a large amount of people by just using a QR code :) </p>
-          </div>
-        </div>
-      </div>
-
-      
+<script>
+    document.getElementById('navToggle').addEventListener('click', function () {
+        document.getElementById('navLinks').classList.toggle('open');
+    });
+</script>
 </body>
 </html>

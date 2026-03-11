@@ -1,33 +1,369 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <title> Contact Form </title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'CSS/form.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Encode QR — Runtime Terror</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/form.css') }}">
+    <style>
+        /* ── Type selector tabs ─────────────────────────── */
+        .type-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 36px;
+        }
+
+        .type-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 18px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: border-color var(--transition), background var(--transition), transform var(--transition);
+            min-width: 90px;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .type-tab .tab-icon { font-size: 22px; }
+
+        .type-tab:hover {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .type-tab.active {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+            color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px var(--accent-dim);
+        }
+
+        /* ── Panel show/hide ────────────────────────────── */
+        .type-panel { display: none; }
+        .type-panel.active { display: block; animation: fadeUp 0.25s ease both; }
+
+        /* ── Colour section ─────────────────────────────── */
+        .color-section {
+            margin-top: 36px;
+            padding-top: 28px;
+            border-top: 1px solid var(--border);
+        }
+
+        .color-section-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .color-section-title::before { content: '// '; color: var(--accent); }
+
+        .color-row {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .color-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .color-field label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .color-picker-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 14px;
+            transition: border-color var(--transition);
+        }
+
+        .color-picker-wrap:focus-within { border-color: var(--accent); }
+
+        .color-picker-wrap input[type="color"] {
+            width: 28px; height: 28px;
+            border: none; background: none;
+            padding: 0; margin: 0;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .color-hex {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text);
+            width: 80px;
+            background: none;
+            border: none;
+            outline: none;
+        }
+
+        /* Presets */
+        .presets {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .preset {
+            width: 36px; height: 36px;
+            border-radius: var(--radius);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: border-color var(--transition), transform var(--transition);
+            position: relative;
+            display: inline-block;
+        }
+
+        .preset:hover { transform: scale(1.15); }
+        .preset.selected { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+    </style>
 </head>
 <body>
-<form NAME = "REGFORM" METHOD = "POST" action = /form >
-<div class="contact-form">
-        <h2 class = "section-name"> Fill the below form </h2>
 
-        <p> Name<span style="color:#FF0000;"> *</span> </p>
-        <input type = "text" placeholder="Enter Name" name = "name" autocomplete="off" required>
+<nav class="topnav">
+    <a class="nav-logo" href="/">RUNTIME<span>TERROR</span></a>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/form" class="active">Encode</a></li>
+        <li><a href="/upload">Decode</a></li>
+        <li><a href="/suggestion">Feedback</a></li>
+        <li><a href="/about">Team</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle">&#9776;</button>
+</nav>
 
-        <p> Phone Number <span style="color:#FF0000;"> *</span> </p>
-        <input type = "text" placeholder="Enter the 10 digit phone number " maxlength = 10 name = "phone" autocomplete="off" required>
+<div class="page-wrap">
+    <h1 class="section-heading">ENCODE <span>QR</span></h1>
+    <p class="section-sub">Choose a type and generate your QR code</p>
 
-        <p> Email Id </p>
-        <input type = "text" placeholder="Enter Email (optional) " name = "email" autocomplete="off">
+    <form method="POST" action="/form" id="encodeForm">
+        <input type="hidden" name="qr_type" id="qr_type" value="contact">
 
-        <p> Enter the filename by which you want to store it in the server (optional) </p>
-        <input type = "text" placeholder="Enter filename (optional) " name = "fname" autocomplete="off">
+        <!-- ── Type tabs ──────────────────────────────── -->
+        <div class="type-tabs">
+            <div class="type-tab active" data-type="contact">
+                <span class="tab-icon">📇</span>Contact Card
+            </div>
+            <div class="type-tab" data-type="whatsapp">
+                <span class="tab-icon">💬</span>WhatsApp
+            </div>
+            <div class="type-tab" data-type="email">
+                <span class="tab-icon">📧</span>Email
+            </div>
+            <div class="type-tab" data-type="url">
+                <span class="tab-icon">🔗</span>URL / Link
+            </div>
+            <div class="type-tab" data-type="custom">
+                <span class="tab-icon">✏️</span>Custom Text
+            </div>
+        </div>
 
-        <p><span style="color:#FF0000;">*</span> - Required to be filled </p>
+        <!-- ── Contact Card ───────────────────────────── -->
+        <div class="type-panel active" id="panel-contact">
+            <div class="form-group">
+                <label class="form-label">Name <span class="required">*</span></label>
+                <input type="text" name="name" placeholder="Full name" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone <span class="required">*</span></label>
+                <input type="text" name="phone" placeholder="Phone number" maxlength="15" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email <span class="optional">(optional)</span></label>
+                <input type="text" name="email" placeholder="email@example.com" autocomplete="off">
+            </div>
+        </div>
 
-        <button type = "submit" VALUE = "Submit" > Submit </button>
+        <!-- ── WhatsApp ───────────────────────────────── -->
+        <div class="type-panel" id="panel-whatsapp">
+            <div class="form-group">
+                <label class="form-label">WhatsApp Number <span class="required">*</span></label>
+                <input type="text" name="wa_phone" placeholder="+91XXXXXXXXXX (with country code)" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pre-filled Message <span class="optional">(optional)</span></label>
+                <textarea name="wa_message" placeholder="Hi, I found your QR code..." rows="4"></textarea>
+            </div>
+        </div>
+
+        <!-- ── Email ──────────────────────────────────── -->
+        <div class="type-panel" id="panel-email">
+            <div class="form-group">
+                <label class="form-label">To <span class="required">*</span></label>
+                <input type="text" name="email_to" placeholder="recipient@example.com" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Subject <span class="optional">(optional)</span></label>
+                <input type="text" name="email_subject" placeholder="Email subject" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Body <span class="optional">(optional)</span></label>
+                <textarea name="email_body" placeholder="Email body text..." rows="4"></textarea>
+            </div>
+        </div>
+
+        <!-- ── URL ────────────────────────────────────── -->
+        <div class="type-panel" id="panel-url">
+            <div class="form-group">
+                <label class="form-label">URL / Link <span class="required">*</span></label>
+                <input type="text" name="url" placeholder="https://example.com" autocomplete="off">
+                <p class="form-hint">https:// will be added if missing</p>
+            </div>
+        </div>
+
+        <!-- ── Custom ─────────────────────────────────── -->
+        <div class="type-panel" id="panel-custom">
+            <div class="form-group">
+                <label class="form-label">Custom Text <span class="required">*</span></label>
+                <textarea name="custom_text" placeholder="Anything you want encoded..." rows="6"></textarea>
+            </div>
+        </div>
+
+        <!-- ── Colour & Style ─────────────────────────── -->
+        <div class="color-section">
+            <p class="color-section-title">Colour &amp; Style</p>
+
+            <div class="color-row">
+                <div class="color-field">
+                    <label>QR Colour</label>
+                    <div class="color-picker-wrap">
+                        <input type="color" id="fg_picker" value="#000000">
+                        <input class="color-hex" id="fg_hex" maxlength="7" value="#000000">
+                    </div>
+                </div>
+                <div class="color-field">
+                    <label>Background</label>
+                    <div class="color-picker-wrap">
+                        <input type="color" id="bg_picker" value="#ffffff">
+                        <input class="color-hex" id="bg_hex" maxlength="7" value="#ffffff">
+                    </div>
+                </div>
+                <input type="hidden" name="fg_color" id="fg_color" value="#000000">
+                <input type="hidden" name="bg_color" id="bg_color" value="#ffffff">
+            </div>
+
+            <!-- Preset swatches: [fg, bg] -->
+            <div class="presets" id="presets">
+                <div class="preset selected" data-fg="#000000" data-bg="#ffffff"
+                     style="background: linear-gradient(135deg,#000 50%,#fff 50%)" title="Classic"></div>
+                <div class="preset" data-fg="#00e5c8" data-bg="#0e1520"
+                     style="background: linear-gradient(135deg,#00e5c8 50%,#0e1520 50%)" title="Teal Night"></div>
+                <div class="preset" data-fg="#ff3355" data-bg="#1a0008"
+                     style="background: linear-gradient(135deg,#ff3355 50%,#1a0008 50%)" title="Crimson"></div>
+                <div class="preset" data-fg="#f5a623" data-bg="#1a1200"
+                     style="background: linear-gradient(135deg,#f5a623 50%,#1a1200 50%)" title="Amber"></div>
+                <div class="preset" data-fg="#7c3aed" data-bg="#0f0a1a"
+                     style="background: linear-gradient(135deg,#7c3aed 50%,#0f0a1a 50%)" title="Violet"></div>
+                <div class="preset" data-fg="#10b981" data-bg="#001a10"
+                     style="background: linear-gradient(135deg,#10b981 50%,#001a10 50%)" title="Matrix"></div>
+                <div class="preset" data-fg="#ffffff" data-bg="#000000"
+                     style="background: linear-gradient(135deg,#fff 50%,#000 50%)" title="Inverted"></div>
+                <div class="preset" data-fg="#1e3a5f" data-bg="#e8f4fc"
+                     style="background: linear-gradient(135deg,#1e3a5f 50%,#e8f4fc 50%)" title="Ocean"></div>
+            </div>
+        </div>
+
+        <!-- ── Filename ───────────────────────────────── -->
+        <div class="form-group" style="margin-top: 32px;">
+            <label class="form-label">Save as <span class="optional">(optional)</span></label>
+            <input type="text" name="fname" placeholder="e.g. my_qr" autocomplete="off">
+        </div>
+
+        <button type="submit" class="btn btn-solid">&#9654; &nbsp;Generate QR Code</button>
+    </form>
 </div>
-</form>
+
+<script>
+    // ── Tab switching ──────────────────────────────────
+    const tabs   = document.querySelectorAll('.type-tab');
+    const panels = document.querySelectorAll('.type-panel');
+    const typeInput = document.getElementById('qr_type');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            panels.forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('panel-' + tab.dataset.type).classList.add('active');
+            typeInput.value = tab.dataset.type;
+        });
+    });
+
+    // ── Colour pickers ─────────────────────────────────
+    function syncColor(picker, hexInput, hiddenInput, presetsEl, isFg) {
+        picker.addEventListener('input', () => {
+            hexInput.value = picker.value;
+            hiddenInput.value = picker.value;
+            clearPresetSelection();
+        });
+        hexInput.addEventListener('input', () => {
+            if (/^#[0-9a-fA-F]{6}$/.test(hexInput.value)) {
+                picker.value = hexInput.value;
+                hiddenInput.value = hexInput.value;
+                clearPresetSelection();
+            }
+        });
+    }
+
+    function clearPresetSelection() {
+        document.querySelectorAll('.preset').forEach(p => p.classList.remove('selected'));
+    }
+
+    const fgPicker = document.getElementById('fg_picker');
+    const bgPicker = document.getElementById('bg_picker');
+    const fgHex    = document.getElementById('fg_hex');
+    const bgHex    = document.getElementById('bg_hex');
+    const fgHidden = document.getElementById('fg_color');
+    const bgHidden = document.getElementById('bg_color');
+
+    syncColor(fgPicker, fgHex, fgHidden);
+    syncColor(bgPicker, bgHex, bgHidden);
+
+    // ── Preset selection ───────────────────────────────
+    document.querySelectorAll('.preset').forEach(preset => {
+        preset.addEventListener('click', () => {
+            clearPresetSelection();
+            preset.classList.add('selected');
+            const fg = preset.dataset.fg;
+            const bg = preset.dataset.bg;
+            fgPicker.value = fg; fgHex.value = fg; fgHidden.value = fg;
+            bgPicker.value = bg; bgHex.value = bg; bgHidden.value = bg;
+        });
+    });
+
+    // ── Navbar toggle ──────────────────────────────────
+    document.getElementById('navToggle').addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('open');
+    });
+</script>
 </body>
 </html>
-
-

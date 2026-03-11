@@ -1,20 +1,76 @@
-<!-- the below code is working, but loads the previous qr code. not the fresh one! -->
-
-<!-- <img src="{{ url_for('static', filename = 'flask4.png') }}" height="300" width="200">  -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-        <script>
-                function goBack() {
-                  window.history.back()
-                }
-                </script>
-    <title>QR IMAGE</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>View QR — Runtime Terror</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/base.css') }}">
+    <style>
+        .qr-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 28px;
+            padding-top: 24px;
+            text-align: center;
+        }
+        .qr-img-wrap {
+            padding: 20px;
+            background: #fff;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 0 60px rgba(0,229,200,0.15);
+            animation: fadeUp 0.5s ease both;
+        }
+        .qr-img-wrap img {
+            display: block;
+            max-width: 280px;
+            width: 100%;
+        }
+        .qr-actions {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeUp 0.5s 0.15s ease both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
-     <img src="{{ user_image }}" alt="QRCODE!"> 
-     <button onclick="window.location='\\';">GO to home!</button>
-     <button onclick="window.location='\\QR\\{{ fname }}';">Download the image!</button>
-     <button onclick="goBack()">Go Back</button> 
+
+<nav class="topnav">
+    <a class="nav-logo" href="/">RUNTIME<span>TERROR</span></a>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/form" class="active">Encode</a></li>
+        <li><a href="/upload">Decode</a></li>
+        <li><a href="/suggestion">Feedback</a></li>
+        <li><a href="/about">Team</a></li>
+        
+    </ul>
+    <button class="nav-toggle" id="navToggle">&#9776;</button>
+</nav>
+
+<div class="page-wrap">
+    <div class="qr-view">
+        <h1 class="section-heading" style="margin-bottom:0">QR <span>IMAGE</span></h1>
+        <div class="qr-img-wrap">
+            <img src="{{ user_image }}" alt="Generated QR Code">
+        </div>
+        <div class="qr-actions">
+            <a href="/QR/{{ fname }}" class="btn btn-solid">&#8681; &nbsp;Download PNG</a>
+            <a href="/" class="btn">&#8592; &nbsp;Home</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('navToggle').addEventListener('click', function () {
+        document.getElementById('navLinks').classList.toggle('open');
+    });
+</script>
 </body>
 </html>

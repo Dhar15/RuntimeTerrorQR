@@ -1,53 +1,90 @@
+/* ── Suggestion / Feedback Page ──────────────────────── */
+
+.rating-wrap {
+    margin-bottom: 28px;
+}
+
+.rating-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    display: block;
+}
+
+/* Star rating — reversed flex trick */
 .rating {
-    float:left;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 6px;
+    border: none;
+    padding: 0;
 }
 
-.rating:not(:checked) > input {
-    position:absolute;
-    top:-9999px;
-    clip:rect(0,0,0,0);
+.rating input {
+    position: absolute;
+    width: 1px; height: 1px;
+    opacity: 0; clip: rect(0,0,0,0);
 }
 
-.rating:not(:checked) > label {
-    float:right;
-    width:1em;
-    padding:0 .1em;
-    overflow:hidden;
-    white-space:nowrap;
-    cursor:pointer;
-    font-size:200%;
-    line-height:1.2;
-    color:#ddd;
-    text-shadow:1px 1px #bbb, 2px 2px #666, .1em .1em .2em rgba(0,0,0,.5);
+.rating label {
+    font-size: 36px;
+    color: var(--bg-elevated);
+    cursor: pointer;
+    transition: color 0.15s, transform 0.15s;
+    line-height: 1;
 }
 
-.rating:not(:checked) > label:before {
-    content: '★ ';
+/* highlight from hovered star leftward (row-reverse trick) */
+.rating label:hover,
+.rating label:hover ~ label {
+    color: var(--accent2);
+    transform: scale(1.15);
 }
 
-.rating > input:checked ~ label {
-    color: #f70;
-    text-shadow:1px 1px #c60, 2px 2px #940, .1em .1em .2em rgba(0,0,0,.5);
+.rating input:checked ~ label {
+    color: var(--accent2);
 }
 
-.rating:not(:checked) > label:hover,
-.rating:not(:checked) > label:hover ~ label {
-    color: gold;
-    text-shadow:1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);
+.rating input:checked + label:hover,
+.rating input:checked ~ label:hover,
+.rating input:checked ~ label:hover ~ label,
+.rating label:hover ~ input:checked ~ label {
+    color: #e09010;
 }
 
-.rating > input:checked + label:hover,
-.rating > input:checked + label:hover ~ label,
-.rating > input:checked ~ label:hover,
-.rating > input:checked ~ label:hover ~ label,
-.rating > label:hover ~ input:checked ~ label {
-    color: #ea0;
-    text-shadow:1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);
+/* ── Thank you screen ────────────────────────────────── */
+.thankyou-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    gap: 20px;
 }
 
-.rating > label:active {
-    position:relative;
-    top:2px;
-    left:2px;
+.thankyou-icon {
+    font-size: 56px;
+    animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+@keyframes pop {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.thankyou-title {
+    font-family: var(--font-display);
+    font-size: 48px;
+    letter-spacing: 3px;
+    color: var(--accent);
+}
+
+.thankyou-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+}

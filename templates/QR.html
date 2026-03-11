@@ -1,35 +1,83 @@
-<!-- the below code is working, but loads the previous qr code. not the fresh one! -->
-
-<!-- <img src="{{ url_for('static', filename = 'flask4.png') }}" height="300" width="200">  -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8"> 
-    <title>QR CODE</title>
-    <script>
-            function goBack() {
-              window.history.back()
-            }
-            </script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>QR Generated — Runtime Terror</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/base.css') }}">
+    <style>
+        .qr-result {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
+            padding-top: 40px;
+            text-align: center;
+        }
+        .qr-badge {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            padding: 6px 16px;
+            border: 1px solid var(--border-hover);
+            border-radius: 100px;
+            background: var(--accent-dim);
+            animation: fadeUp 0.5s ease both;
+        }
+        .qr-title {
+            font-family: var(--font-display);
+            font-size: 52px;
+            letter-spacing: 4px;
+            color: var(--text);
+            animation: fadeUp 0.5s 0.1s ease both;
+        }
+        .qr-title span { color: var(--accent); }
+        .qr-actions {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeUp 0.5s 0.2s ease both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
-    <!-- <img src="{{ user_image }}" alt="QRCODE!">  -->
-    <!--                                                      
-    <button type="button" id="down" > PRESS HERE TO DOWNLOAD!</button>
-    <button type="button" id="goback"> PRESS HERE TO GO BACK!</button>
-    <a href="\form\QRIMAGE"> Download image!</a>
-    <a href="\form"> Go back to the form</a>
 
+<nav class="topnav">
+    <a class="nav-logo" href="/">RUNTIME<span>TERROR</span></a>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/form" class="active">Encode</a></li>
+        <li><a href="/upload">Decode</a></li>
+        <li><a href="/suggestion">Feedback</a></li>
+        <li><a href="/about">Team</a></li>
+        
+    </ul>
+    <button class="nav-toggle" id="navToggle">&#9776;</button>
+</nav>
 
-    THE REASON I HAVE TO GIVE \\form is because the first one is being used as an escape character. 
+<div class="page-wrap">
+    <div class="qr-result">
+        <div class="qr-badge">&#10003; &nbsp;QR Code Generated</div>
+        <div class="qr-title">YOUR <span>QR</span> IS READY</div>
+        <div class="qr-actions">
+            <a href="/QRIMG/{{ fname }}" class="btn">&#128247; &nbsp;View Image</a>
+            <a href="/QR/{{ fname }}" class="btn btn-solid">&#8681; &nbsp;Download PNG</a>
+            <a href="/form" class="btn">&#8592; &nbsp;Encode Another</a>
+        </div>
+    </div>
+</div>
 
-    THE ONLY USE OF THIS PAGE IS TO DISPLAY THE OPTIONS AVAIBALE TO THE USER!   
-    -->
-    QR IMAGE GENERATED!
-   <!-- <button onclick="window.location='\\form\\{{ fname }}';">See QRIMAGE!!</button>  -->
-    <button onclick="window.location='\\QR\\{{ fname }}';">Download the image!</button> <!-- fname comes from flask as filename for url creation!-->
-    <button onclick="goBack()">Go Back</button>
-   <!----> <button onclick="window.location='\\QRIMG\\{{ fname }}';">see image</button>
-    
+<script>
+    document.getElementById('navToggle').addEventListener('click', function () {
+        document.getElementById('navLinks').classList.toggle('open');
+    });
+</script>
 </body>
 </html>

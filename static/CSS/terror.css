@@ -1,48 +1,129 @@
-.topnav {
-    background-color:red;
-    overflow: hidden;    
-}
+/* ── Homepage Hero ───────────────────────────────────── */
 
-.topnav a {
-    float: left;
-    display: block;
-    color: #f2f2f2;
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-    font-size: 17px;
-}
-
-.topnav a:hover {
-    background-color: #ddd;
-    color:black;
-}
-
-.active {
-    background-color: blue;
-    color:white;
-}
-
-.topnav .icon {
-    display: none;
-} 
-
-.top-wrapper {
-    padding: 500px 0 100px 0;
-    background-image: url("terror_image.jpg");
-    background-size: cover;
-    height:100%;
-    color: white;
-    text-align: center;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-.top-wrapper h1,p {
-    color : red;
-} 
-
-.container h1,p {
     position: relative;
-    top:80px;
+    overflow: hidden;
+    padding: 0 32px;
+    background: #000;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 60%, rgba(0,229,200,0.07) 0%, transparent 70%);
+    z-index: 0;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: scanline 4s ease-in-out infinite;
+    opacity: 0.5;
+    z-index: 1;
+}
+
+@keyframes scanline {
+    0%   { top: 0%;   opacity: 0; }
+    10%  { opacity: 0.5; }
+    90%  { opacity: 0.5; }
+    100% { top: 100%; opacity: 0; }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 760px;
+    animation: fadeUp 0.9s ease both;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    animation: fadeUp 0.9s 0.1s ease both;
+}
+
+.hero-eyebrow::before { content: '[ '; }
+.hero-eyebrow::after  { content: ' ]'; }
+
+.hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(64px, 10vw, 110px);
+    letter-spacing: 6px;
+    line-height: 0.95;
+    color: var(--text);
+    margin-bottom: 24px;
+    text-shadow: 0 0 60px rgba(0,229,200,0.2);
+    animation: fadeUp 0.9s 0.2s ease both;
+}
+
+.hero h1 span { color: var(--accent); }
+
+.hero p {
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 480px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+    animation: fadeUp 0.9s 0.3s ease both;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 0.9s 0.4s ease both;
+}
+
+/* ── Feature strip ───────────────────────────────────── */
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.feature-item {
+    background: var(--bg);
+    padding: 36px 32px;
+    text-align: center;
+    transition: background var(--transition);
+}
+
+.feature-item:hover { background: var(--bg-surface); }
+
+.feature-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+
+.feature-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+.feature-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+@media (max-width: 640px) {
+    .features { grid-template-columns: 1fr; }
 }

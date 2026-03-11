@@ -1,31 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <title> About Us </title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'CSS/about.css') }}" height="200" width="200">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Team — Runtime Terror</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/about.css') }}">
 </head>
+<body>
 
-<div class="contents">
-        <h3 class="section-title">The Team </h3>
-        <div class="contents-item">
-          <img src="{{ url_for('static', filename = 'kshitij.jpeg') }}" height="300" width="200">
-          <p>Kshitij Dhar</p>
-          <p>Frontend Designer</p>
+<nav class="topnav">
+    <a class="nav-logo" href="/">RUNTIME<span>TERROR</span></a>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/form">Encode</a></li>
+        <li><a href="/upload">Decode</a></li>
+        <li><a href="/suggestion">Feedback</a></li>
+        <li><a href="/about" class="active">Team</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle">&#9776;</button>
+</nav>
+
+<div class="page-wrap">
+    <h1 class="section-heading">THE <span>TEAM</span></h1>
+    <p class="section-sub">Hover a card to get our contact QR</p>
+
+    <div class="team-grid">
+
+        {% for key, member in team.items() %}
+        <div class="team-card">
+            <!-- Photo -->
+            <div class="team-photo-wrap">
+                <img class="team-card-img"
+                     src="{{ url_for('static', filename=member.img) }}"
+                     alt="{{ member.name }}">
+                <!-- QR overlay on hover -->
+                <div class="team-qr-overlay">
+                    <div class="qr-overlay-inner">
+                        <img class="team-qr-img"
+                             src="/team-qr/{{ key }}"
+                             alt="{{ member.name }} QR">
+                        <p class="qr-overlay-label">Scan to save contact</p>
+                        <a class="qr-dl-link" href="/team-qr/{{ key }}" download="{{ key }}_qr.png">
+                            &#8681; Download
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- Info -->
+            <div class="team-card-body">
+                <div class="team-card-name">{{ member.name }}</div>
+                <div class="team-card-role">{{ member.role }}</div>
+                <div class="team-card-contact">
+                    <span>{{ member.phone }}</span>
+                    <span>{{ member.email }}</span>
+                </div>
+            </div>
         </div>
-        <div class="contents-item">
-          <img src="{{ url_for('static', filename = 'pratyush.jpg') }}" height="300" width="200">
-          <p>M. Pratyush</p>
-          <p>Frontend Handler</p>
-        </div>
-        <div class="contents-item">
-          <img src="{{ url_for('static', filename = 'aditya.jpeg') }}" height="300" width="200">
-          <p>Aditya Singh</p>
-          <p>Backend Developer</p>
-        </div>
-        <div class="contents-item">
-          <img src="{{ url_for('static', filename = 'abhishek.jpeg') }}" height="300" width="200">
-          <p>Abhishek Bhalotia</p>
-          <p>Backend Handler</p>
-        </div>
+        {% endfor %}
+
+    </div>
 </div>
+
+<script>
+    document.getElementById('navToggle').addEventListener('click', function () {
+        document.getElementById('navLinks').classList.toggle('open');
+    });
+</script>
+</body>
+</html>

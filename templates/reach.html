@@ -1,61 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <title> Feedback </title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'CSS/reach.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reach Us — Runtime Terror</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/reach.css') }}">
 </head>
 <body>
 
-<div class="image">
-    <img src="C:\Users\kshitij\Documents\GitHub\RuntimeTerrorQR\static\logo.png" width="100%" height="400">
+<nav class="topnav">
+    <a class="nav-logo" href="/">RUNTIME<span>TERROR</span></a>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="/">Home</a></li>
+        <li><a href="/form">Encode</a></li>
+        <li><a href="/upload">Decode</a></li>
+        <li><a href="/suggestion">Feedback</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/reach" class="active">Reach Us</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle">&#9776;</button>
+</nav>
+
+<div class="page-wrap">
+    <h1 class="section-heading">REACH <span>US</span></h1>
+    <p class="section-sub">Get in touch with the team</p>
+
+    <div class="reach-grid">
+        <div class="reach-card">
+            <img class="reach-card-img" src="{{ url_for('static', filename='kshitij.jpeg') }}" alt="Kshitij Dhar">
+            <div class="reach-card-body">
+                <div class="reach-card-name">Kshitij Dhar</div>
+                <p class="reach-card-quote">Ah shit, here we go again.</p>
+                <button class="reach-btn">Contact</button>
+            </div>
+        </div>
+        <div class="reach-card">
+            <img class="reach-card-img" src="{{ url_for('static', filename='aditya.jpeg') }}" alt="Aditya R Singh">
+            <div class="reach-card-body">
+                <div class="reach-card-name">Aditya R Singh</div>
+                <p class="reach-card-quote">Mandir wahin banega.</p>
+                <button class="reach-btn">Contact</button>
+            </div>
+        </div>
+        <div class="reach-card">
+            <img class="reach-card-img" src="{{ url_for('static', filename='abhishek.jpeg') }}" alt="Abhishek Bhalotia">
+            <div class="reach-card-body">
+                <div class="reach-card-name">Abhishek Bhalotia</div>
+                <p class="reach-card-quote">Main kothe se aai, mere ko maalum hai.</p>
+                <button class="reach-btn">Contact</button>
+            </div>
+        </div>
+        <div class="reach-card">
+            <img class="reach-card-img" src="{{ url_for('static', filename='pratyush.jpg') }}" alt="M. Pratyush">
+            <div class="reach-card-body">
+                <div class="reach-card-name">M. Pratyush</div>
+                <p class="reach-card-quote">Main chutiya hun.</p>
+                <button class="reach-btn">Contact</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="row">
-    <div class="column">
-      <div class="card">
-        <img src="C:\Users\kshitij\Documents\GitHub\RuntimeTerrorQR\static\kshitij.jpeg" alt="Dhar" style="width:100%">
-        <div class="container">
-          <h2>Kshitij Dhar</h2>
-          <p>Ah shit,here we go again.</p>
-          <p><button class="button">Contact</button></p>
-        </div>
-      </div>
-    </div>
-  
-    <div class="column">
-      <div class="card">
-        <img src="C:\Users\kshitij\Documents\GitHub\RuntimeTerrorQR\static\aditya.jpeg" alt="Adi" style="width:100%">
-        <div class="container">
-          <h2>Aditya R Singh</h2>
-          <p>Mandir wahin banega.</p>
-          <p><button class="button">Contact</button></p>
-        </div>
-      </div>
-    </div>
-  
-    <div class="column">
-      <div class="card">
-        <img src="C:\Users\kshitij\Documents\GitHub\RuntimeTerrorQR\static\abhishek.jpeg" alt="Abhi" style="width:100%">
-        <div class="container">
-          <h2>Abhishek Bhalotia</h2>
-          <p>Main kothe se aai mere ko maalum hai tere ko kya chahiye </p>
-          <p><button class="button">Contact</button></p>
-        </div>
-      </div>
-    </div>
-
-  <div class="column">
-    <div class="card">
-      <img src="C:\Users\kshitij\Documents\GitHub\RuntimeTerrorQR\static\pratyush.jpg" alt="Prat" style="width:100%">
-      <div class="container">
-        <h2>M. Pratyush</h2>
-        <p>Main chutiya hun</p>
-        <p><button class="button">Contact</button></p>
-      </div>
-    </div>
-  </div>
-  </div>
-
-  </body>
-  </html>
+<script>
+    document.getElementById('navToggle').addEventListener('click', function () {
+        document.getElementById('navLinks').classList.toggle('open');
+    });
+</script>
+</body>
+</html>
