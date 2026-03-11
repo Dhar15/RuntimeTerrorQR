@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>View QR — Runtime Terror</title>
+    <title>Your QR Code — Runtime Terror</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/base.css') }}">
     <style>
         .qr-view {
@@ -33,7 +33,6 @@
             justify-content: center;
             animation: fadeUp 0.5s 0.15s ease both;
         }
-
         /* ── Google Lens tip ─────────────────────────── */
         .lens-tip {
             display: flex;
@@ -44,6 +43,7 @@
             border: 1px solid rgba(245, 166, 35, 0.3);
             border-radius: var(--radius);
             max-width: 360px;
+            animation: fadeUp 0.5s 0.25s ease both;
         }
         .lens-tip-icon { font-size: 20px; flex-shrink: 0; }
         .lens-tip-text {
@@ -52,6 +52,7 @@
             letter-spacing: 0.05em;
             color: var(--accent2);
             line-height: 1.6;
+            text-align: left;
         }
         .lens-tip-text strong {
             display: block;
@@ -75,27 +76,34 @@
         <li><a href="/upload">Decode</a></li>
         <li><a href="/suggestion">Feedback</a></li>
         <li><a href="/about">Team</a></li>
-        
     </ul>
     <button class="nav-toggle" id="navToggle">&#9776;</button>
 </nav>
 
 <div class="page-wrap">
     <div class="qr-view">
-        <h1 class="section-heading" style="margin-bottom:0">QR <span>IMAGE</span></h1>
+        <h1 class="section-heading" style="margin-bottom:0">QR <span>READY</span></h1>
+
         <div class="qr-img-wrap">
-            <img src="{{ user_image }}" alt="Generated QR Code">
+            <img src="data:image/png;base64,{{ qr_b64 }}" alt="Generated QR Code">
         </div>
+
+        <div class="qr-actions">
+            <!-- data URL download — no file stored on server -->
+            <a class="btn btn-solid"
+               href="data:image/png;base64,{{ qr_b64 }}"
+               download="{{ fname }}.png">
+                &#8681; &nbsp;Download PNG
+            </a>
+            <a href="/form" class="btn">&#8592; &nbsp;Encode Another</a>
+        </div>
+
         <div class="lens-tip">
-                    <span class="lens-tip-icon">&#128269;</span>
-                    <div class="lens-tip-text">
-                        <strong>Pro Tip</strong>
-                        For best results on mobile, scan with <strong>Google Lens</strong> — it handles styled &amp; coloured QR codes better than the default camera app.
-                    </div>
-                </div>
-                <div class="qr-actions">
-            <a href="/QR/{{ fname }}" class="btn btn-solid">&#8681; &nbsp;Download PNG</a>
-            <a href="/" class="btn">&#8592; &nbsp;Home</a>
+            <span class="lens-tip-icon">&#128269;</span>
+            <div class="lens-tip-text">
+                <strong>Pro Tip</strong>
+                For best results on mobile, scan with <strong>Google Lens</strong> — it handles styled &amp; coloured QR codes better than the default camera app.
+            </div>
         </div>
     </div>
 </div>

@@ -1,20 +1,17 @@
-from flask import Flask, render_template, request, url_for, send_from_directory, send_file
+from flask import Flask, render_template, request, send_file
 import qrcode
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.colormasks import SolidFillColorMask
-import os, time, warnings, io
+import os, time, warnings, io, base64
 from PIL import Image
 from pyzbar import pyzbar
 
-UP_FOLDER = os.path.join('static', 'QRcode')
+# Team QRs are the only thing cached to disk (they never change)
 TEAM_FOLDER = os.path.join('static', 'team_qr')
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UP_FOLDER
-
-os.makedirs(UP_FOLDER, exist_ok=True)
 os.makedirs(TEAM_FOLDER, exist_ok=True)
 
-# ── Team member data (edit with real details) ──────────────────────────────────
+# ── Team member data ───────────────────────────────────────────────────────────
 TEAM = {
     "kshitij": {
         "name": "Kshitij Dhar", "phone": "+910000000001",
@@ -40,7 +37,6 @@ TEAM = {
 
 
 def hex_to_rgb(hex_str):
-    """Convert #rrggbb → (r, g, b). Falls back to black/white on bad input."""
     hex_str = hex_str.lstrip('#')
     try:
         return tuple(int(hex_str[i:i+2], 16) for i in (0, 2, 4))
@@ -48,34 +44,25 @@ def hex_to_rgb(hex_str):
         return (0, 0, 0)
 
 
-def make_qr(data, fg="#000000", bg="#ffffff", fname=None):
-    """Generate a QR PNG, save to UP_FOLDER, return the filename."""
+def make_qr_b64(data, fg="#000000", bg="#ffffff"):
+    """Generate a QR code entirely in memory. Returns a base64 PNG string."""
     warnings.filterwarnings("ignore")
-    base = (fname or "qr").strip() or "qr"
-    # re-use existing file if same name; add _2, _3 ... on collision
-    candidate = base + ".png"
-    counter = 2
-    while os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], candidate)):
-        candidate = f"{base}_{counter}.png"
-        counter += 1
-    out_name = candidate
-
-    fg_rgb = hex_to_rgb(fg)
-    bg_rgb = hex_to_rgb(bg)
-
-    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H,
-                       box_size=10, border=4)
+    qr = qrcode.QRCode(
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10, border=4
+    )
     qr.add_data(data)
     qr.make(fit=True)
-
     img = qr.make_image(
         image_factory=StyledPilImage,
-        color_mask=SolidFillColorMask(front_color=fg_rgb, back_color=bg_rgb)
+        color_mask=SolidFillColorMask(
+            front_color=hex_to_rgb(fg),
+            back_color=hex_to_rgb(bg)
+        )
     )
-
-    out_path = os.path.join(app.config['UPLOAD_FOLDER'], out_name)
-    img.save(out_path)
-    return out_name
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    return base64.b64encode(buf.getvalue()).decode('utf-8')
 
 
 # ── Routes ─────────────────────────────────────────────────────────────────────
@@ -96,15 +83,13 @@ def form():
         qr_type  = request.form.get("qr_type", "contact")
         fg_color = request.form.get("fg_color", "#000000")
         bg_color = request.form.get("bg_color", "#ffffff")
-        fname    = request.form.get("fname", "") or "qr"
+        fname    = (request.form.get("fname", "") or "qr").strip()
 
-        # ── Build QR data string based on type ──────────────────────────────
         if qr_type == "contact":
             name  = request.form.get("name", "")
             phone = request.form.get("phone", "")
             email = request.form.get("email", "")
-            data  = (f"BEGIN:VCARD\nVERSION:3.0\nN:{name}\n"
-                     f"TEL:{phone}\nEMAIL:{email}\nEND:VCARD")
+            data  = f"BEGIN:VCARD\nVERSION:3.0\nN:{name}\nTEL:{phone}\nEMAIL:{email}\nEND:VCARD"
 
         elif qr_type == "whatsapp":
             phone   = request.form.get("wa_phone", "").strip().lstrip("+")
@@ -118,7 +103,7 @@ def form():
             data    = f"mailto:{to}?subject={subject}&body={body}"
 
         elif qr_type == "url":
-            url  = request.form.get("url", "").strip()
+            url = request.form.get("url", "").strip()
             if not url.startswith(("http://", "https://")):
                 url = "https://" + url
             data = url
@@ -129,14 +114,11 @@ def form():
                 return render_template("form.html", error="Custom text cannot be empty.")
 
         try:
-            out_name = make_qr(data, fg=fg_color, bg=bg_color, fname=fname)
+            qr_b64 = make_qr_b64(data, fg=fg_color, bg=bg_color)
         except Exception as e:
             return render_template("form.html", error=f"QR generation failed: {str(e)}")
 
-        app.config['THEFILE'] = out_name
-        return render_template("QR.html",
-                               user_image=os.path.join(app.config['UPLOAD_FOLDER'], out_name),
-                               fname=out_name)
+        return render_template("QRIMG.html", qr_b64=qr_b64, fname=fname)
 
     return render_template("form.html")
 
@@ -148,60 +130,51 @@ def upload():
         file = request.files.get('qr_file')
         if not file or file.filename == '':
             return render_template("upload.html", error="No file selected.")
-        ext = file.filename.rsplit('.', 1)[-1].lower()
-        if ext not in ALLOWED:
+        if file.filename.rsplit('.', 1)[-1].lower() not in ALLOWED:
             return render_template("upload.html", error="Unsupported file type.")
         try:
             img_bytes = file.read()
             img = Image.open(io.BytesIO(img_bytes))
 
-            # ── Strategy 1: pyzbar on RGB ──────────────────────────────────────
+            # Strategy 1: pyzbar on RGB
             rgb = img.convert('RGB')
             decoded = pyzbar.decode(rgb)
             if decoded:
-                results = [d.data.decode('utf-8', errors='replace') for d in decoded]
-                return render_template("upload.html", results=results)
+                return render_template("upload.html", results=[d.data.decode('utf-8', errors='replace') for d in decoded])
 
-            # ── Strategy 2: pyzbar on grayscale ───────────────────────────────
+            # Strategy 2: pyzbar on grayscale
             gray_pil = img.convert('L')
             decoded = pyzbar.decode(gray_pil)
             if decoded:
-                results = [d.data.decode('utf-8', errors='replace') for d in decoded]
-                return render_template("upload.html", results=results)
+                return render_template("upload.html", results=[d.data.decode('utf-8', errors='replace') for d in decoded])
 
-            # ── Strategy 3: pyzbar on contrast-enhanced grayscale ─────────────
+            # Strategy 3: contrast-enhanced grayscale
             from PIL import ImageEnhance, ImageOps
             enhanced = ImageEnhance.Contrast(gray_pil).enhance(2.5)
             decoded = pyzbar.decode(enhanced)
             if decoded:
-                results = [d.data.decode('utf-8', errors='replace') for d in decoded]
-                return render_template("upload.html", results=results)
+                return render_template("upload.html", results=[d.data.decode('utf-8', errors='replace') for d in decoded])
 
-            # ── Strategy 4: pyzbar on inverted image (handles dark-bg QRs) ─────
-            inverted = ImageOps.invert(gray_pil)
-            decoded = pyzbar.decode(inverted)
+            # Strategy 4: inverted (dark-bg QRs)
+            decoded = pyzbar.decode(ImageOps.invert(gray_pil))
             if decoded:
-                results = [d.data.decode('utf-8', errors='replace') for d in decoded]
-                return render_template("upload.html", results=results)
+                return render_template("upload.html", results=[d.data.decode('utf-8', errors='replace') for d in decoded])
 
-            # ── Strategy 5: OpenCV QRCodeDetector (handles styled/colored QRs) ─
+            # Strategy 5: OpenCV
             import cv2, numpy as np
-            cv_img = cv2.cvtColor(np.array(rgb), cv2.COLOR_RGB2BGR)
+            cv_img   = cv2.cvtColor(np.array(rgb), cv2.COLOR_RGB2BGR)
             detector = cv2.QRCodeDetector()
 
-            # try on original
             val, _, _ = detector.detectAndDecode(cv_img)
             if val:
                 return render_template("upload.html", results=[val])
 
-            # try on grayscale + Otsu threshold
             gray_cv = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
             _, thresh = cv2.threshold(gray_cv, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
             val, _, _ = detector.detectAndDecode(thresh)
             if val:
                 return render_template("upload.html", results=[val])
 
-            # try on inverted threshold (dark-background QRs)
             val, _, _ = detector.detectAndDecode(cv2.bitwise_not(thresh))
             if val:
                 return render_template("upload.html", results=[val])
@@ -212,29 +185,16 @@ def upload():
     return render_template("upload.html")
 
 
-@app.route("/QR/<p>")
-def QRdown(p):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], p, as_attachment=True)
-
-
-@app.route("/QRIMG/<p>")
-def QRIMG(p):
-    full = os.path.join(app.config['UPLOAD_FOLDER'], p)
-    return render_template("QRIMG.html", user_image="/" + full, fname=p)
-
-
-# ── Team contact-card QR (generated once, then cached) ────────────────────────
+# ── Team QRs: generated once, cached to disk, served as PNG ───────────────────
 @app.route("/team-qr/<member>")
 def team_qr(member):
     m = TEAM.get(member)
     if not m:
         return "Not found", 404
     out_path = os.path.join(TEAM_FOLDER, f"{member}.png")
-    if not os.path.exists(out_path):          # generate and cache
-        vcard = (f"BEGIN:VCARD\nVERSION:3.0\nN:{m['name']}\n"
-                 f"TEL:{m['phone']}\nEMAIL:{m['email']}\nEND:VCARD")
-        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H,
-                           box_size=8, border=3)
+    if not os.path.exists(out_path):
+        vcard = f"BEGIN:VCARD\nVERSION:3.0\nN:{m['name']}\nTEL:{m['phone']}\nEMAIL:{m['email']}\nEND:VCARD"
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=8, border=3)
         qr.add_data(vcard)
         qr.make(fit=True)
         img = qr.make_image(
