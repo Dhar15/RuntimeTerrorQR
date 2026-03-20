@@ -32,7 +32,7 @@
             <!-- Photo -->
             <div class="team-photo-wrap">
                 <img class="team-card-img"
-                     src="{{ url_for('static', filename=member.img) }}"
+                     src="{% if key == 'kshitij' %}{{ url_for('static', filename=member.img) }}{% else %}{{ url_for('static', filename='default_user.svg') }}{% endif %}"
                      alt="{{ member.name }}">
                 <!-- QR overlay on hover -->
                 <div class="team-qr-overlay">

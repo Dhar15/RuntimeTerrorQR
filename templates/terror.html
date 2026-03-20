@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Runtime Terror — QR Encoder / Decoder</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='CSS/base.css') }}">
@@ -10,7 +11,9 @@
 <body>
 
 <nav class="topnav" id="topnav">
-    <a class="nav-logo" href="/">RUNTIME<span>TERROR</span></a>
+    <a class="nav-logo" href="/">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Runtime Terror" class="nav-logo-img">
+    </a>
     <ul class="nav-links" id="navLinks">
         <li><a href="/" class="active">Home</a></li>
         <li><a href="/form">Encode</a></li>

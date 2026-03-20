@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" fill="none">
+  <!-- background -->
+  <rect width="200" height="240" fill="#0e1520"/>
+  <!-- subtle grid texture -->
+  <pattern id="grid" width="16" height="16" patternUnits="userSpaceOnUse">
+    <path d="M 16 0 L 0 0 0 16" fill="none" stroke="rgba(0,229,200,0.04)" stroke-width="0.5"/>
+  </pattern>
+  <rect width="200" height="240" fill="url(#grid)"/>
+  <!-- body / shoulders -->
+  <ellipse cx="100" cy="210" rx="72" ry="48" fill="#162030"/>
+  <ellipse cx="100" cy="210" rx="72" ry="48" fill="url(#bodygrad)"/>
+  <defs>
+    <radialGradient id="bodygrad" cx="50%" cy="0%" r="100%">
+      <stop offset="0%" stop-color="rgba(0,229,200,0.08)"/>
+      <stop offset="100%" stop-color="rgba(0,229,200,0)"/>
+    </radialGradient>
+    <radialGradient id="headgrad" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#1e3040"/>
+      <stop offset="100%" stop-color="#162030"/>
+    </radialGradient>
+  </defs>
+  <!-- head -->
+  <circle cx="100" cy="95" r="46" fill="#162030"/>
+  <circle cx="100" cy="95" r="46" fill="url(#headgrad)"/>
+  <!-- accent ring -->
+  <circle cx="100" cy="95" r="46" fill="none" stroke="rgba(0,229,200,0.15)" stroke-width="1"/>
+  <!-- face icon — simple user silhouette lines -->
+  <!-- eyes -->
+  <circle cx="85" cy="88" r="4.5" fill="rgba(0,229,200,0.5)"/>
+  <circle cx="115" cy="88" r="4.5" fill="rgba(0,229,200,0.5)"/>
+  <!-- mouth -->
+  <path d="M 86 108 Q 100 118 114 108" stroke="rgba(0,229,200,0.4)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+</svg>
